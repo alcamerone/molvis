@@ -1,7 +1,7 @@
 import nglview
 import os
 from Bio.PDB import PDBList
-from nglview.component import ComponentViewer
+from nglview.widget import NGLWidget
 from nglview.show import StringIO
 from pathlib import Path
 from typing import Union
@@ -27,10 +27,10 @@ class Macromolecule:
             # Don't crash the app, but tell the user about it.
             print("Exception during cleanup:", e)
 
-    def show(self, existing_viewer: Union[ComponentViewer, None] = None) -> Union[ComponentViewer, None]:
+    def show(self, existing_viewer: Union[NGLWidget, None] = None) -> Union[NGLWidget, None]:
         if existing_viewer:
             existing_viewer.add_component(StringIO(self.pdb_data), ext='pdb')
-            # Do not return the ComponentViewer a second time,
+            # Do not return the NGLWidget a second time,
             # just add to the provided viewer
             return
         return nglview.show_file(StringIO(self.pdb_data), ext='pdb')

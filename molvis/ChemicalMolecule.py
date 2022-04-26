@@ -1,6 +1,6 @@
 import nglview
 from chembl_webresource_client.new_client import new_client as chembl
-from nglview.component import ComponentViewer
+from nglview.widget import NGLWidget
 from nglview.show import StringIO
 from pathlib import Path
 from rdkit import Chem
@@ -14,11 +14,11 @@ class ChemicalMolecule:
         self.molecule = Chem.AddHs(self.molecule)
         AllChem.EmbedMolecule(self.molecule)
 
-    def show(self, existing_viewer: Union[ComponentViewer, None] = None) -> Union[ComponentViewer, None]:
+    def show(self, existing_viewer: Union[NGLWidget, None] = None) -> Union[NGLWidget, None]:
         if existing_viewer:
             file_handle = StringIO(Chem.MolToPDBBlock(self.molecule))
             existing_viewer.add_component(file_handle, ext='pdb')
-            # Do not return the ComponentViewer a second time,
+            # Do not return the NGLWidget a second time,
             # just add to the provided viewer
             return
         return nglview.show_rdkit(self.molecule)
