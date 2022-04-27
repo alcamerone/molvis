@@ -2,8 +2,8 @@ import nglview
 import os
 from Bio.PDB import PDBList
 from nglview.widget import NGLWidget
+from nglview.show import StringIO
 from pathlib import Path
-from rdkit import Chem
 from typing import Union
 
 class Macromolecule:
@@ -18,9 +18,6 @@ class Macromolecule:
             # I've opted for the tidier version for now.
             self.pdb_data = pdb_file.read()
 
-        # Convert the PDB data to a RDKit molecule
-        self.molecule = Chem.MolFromPDBBlock(self.pdb_data, sanitize=False, removeHs=False)
-
         try:
             # Tidy up downloaded file
             os.remove(file_path)
@@ -32,14 +29,15 @@ class Macromolecule:
             print("Exception during cleanup:", e)
 
     def show(self, existing_viewer: Union[NGLWidget, None] = None) -> Union[NGLWidget, None]:
+        file_handle = StringIO(self.pdb_data)
         if existing_viewer:
             # If a viewer is provided, add the molecule as a component to that viewer
-            existing_viewer.add_component(self.molecule)
+            existing_viewer.add_component(file_handle, ext='pdb')
             # Do not return the NGLWidget a second time,
             # just add to the provided viewer
             return
         # If no viewer is provided, return the viewer
-        return nglview.show_rdkit(self.molecule)
+        return nglview.show_file(file_handle, ext='pdb')
 
     def save(self, file_path: Union[str, Path]) -> Path:
         # Dump the PDB data we downloaded on instantiation into a file
