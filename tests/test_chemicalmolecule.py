@@ -1,11 +1,13 @@
-import os
+# Ensure we can access the `molvis` package
 import sys
-import unittest
-from unittest.mock import patch
 sys.path.append("..")
+
+import os
+import unittest
 from molvis.ChemicalMolecule import ChemicalMolecule
 from nglview.widget import NGLWidget
 from pathlib import Path
+from unittest.mock import patch
 
 sildenafil_rdkit = """
      RDKit          2D

@@ -1,9 +1,9 @@
 # Ensure we can access the `molvis` package
-import shutil
 import sys
 sys.path.append("..")
 
 import os
+import shutil
 import unittest
 from molvis.Macromolecule import Macromolecule
 from nglview.widget import NGLWidget
