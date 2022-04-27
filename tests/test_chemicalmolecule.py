@@ -3,11 +3,10 @@ import sys
 sys.path.append("..")
 
 import os
-import unittest
+import pytest
 from molvis.ChemicalMolecule import ChemicalMolecule
 from nglview.widget import NGLWidget
 from pathlib import Path
-from unittest.mock import patch
 
 sildenafil_rdkit = """
      RDKit          2D
@@ -106,25 +105,27 @@ class MockChemblReturn:
             }
         ]
 
-class TestChemicalMolecule(unittest.TestCase):
-    @patch('molvis.ChemicalMolecule.chembl.molecule', new=MockChemblReturn)
+@pytest.fixture(autouse=True)
+def mock_pdb_list(monkeypatch):
+    monkeypatch.setattr("chembl_webresource_client.new_client.new_client.molecule", MockChemblReturn, raising=True)
+
+
+class TestChemicalMolecule():
     def test_init(self):
         # Smoke test, just ensure no exceptions are thrown
         ChemicalMolecule("CHEMBL192")
     
-    @patch('molvis.ChemicalMolecule.chembl.molecule', new=MockChemblReturn)
     def test_show(self):
         sildenafil = ChemicalMolecule("CHEMBL192")
         viewer = sildenafil.show()
         # Ensure we got a NGLWidget back
-        self.assertTrue(issubclass(type(viewer), NGLWidget))
+        assert issubclass(type(viewer), NGLWidget)
         
         # This time, pass the viewer we just got, as an argument.
         # We shouldn't return anything
         nothing = sildenafil.show(viewer)
-        self.assertIsNone(nothing)
+        assert nothing == None
     
-    @patch('molvis.ChemicalMolecule.chembl.molecule', new=MockChemblReturn)
     def test_save(self):
         sildenafil = ChemicalMolecule("CHEMBL192")
         
@@ -132,15 +133,15 @@ class TestChemicalMolecule(unittest.TestCase):
         path = sildenafil.save("./sildenafil_str.sdf")
         # Assert with get a subclass of Path back
         # (Will be PosixPath or WindowsPath, depending on the OS)
-        self.assertTrue(issubclass(type(path), Path))
-        self.assertEqual(str(path), "sildenafil_str.sdf")
-        self.assertTrue(os.path.exists(path))
+        assert issubclass(type(path), Path)
+        assert str(path) == "sildenafil_str.sdf"
+        assert os.path.exists(path)
         # Ensure the correct file is produced
         with open(path, 'r') as saved_file:
             saved_data = saved_file.read()
         with open("./fixtures/chembl192.sdf", 'r') as fixture_file:
             fixture_data = fixture_file.read()
-        self.assertEqual(saved_data, fixture_data)
+        assert saved_data == fixture_data
         try:
             os.remove(path)
         except Exception as e:
@@ -150,18 +151,15 @@ class TestChemicalMolecule(unittest.TestCase):
         path = sildenafil.save("./sildenafil_path.sdf")
         # Assert with get a subclass of Path back
         # (Will be PosixPath or WindowsPath, depending on the OS)
-        self.assertTrue(issubclass(type(path), Path))
-        self.assertEqual(str(path), "sildenafil_path.sdf")
-        self.assertTrue(os.path.exists(path))
+        assert issubclass(type(path), Path)
+        assert str(path) == "sildenafil_path.sdf"
+        assert os.path.exists(path)
         with open(path, 'r') as saved_file:
             saved_data = saved_file.read()
         with open("./fixtures/chembl192.sdf", 'r') as fixture_file:
             fixture_data = fixture_file.read()
-        self.assertEqual(saved_data, fixture_data)
+        assert saved_data == fixture_data
         try:
             os.remove(path)
         except Exception as e:
             print("Error removing temporary file:", path)
-
-if __name__ == "__main__":
-    unittest.main()
